@@ -15,16 +15,23 @@ var APIURLS = {
     remoteSet: 'https://www.offcloud.com/#/remote'
 };
 initMenus();
-
-$.get(APIURLS.getRemoteId, function (data) {
-    if (data && data[0] != "<") {
-        localStorage.remoteOptionId = remoteOptionId = data.data[0].remoteOptionId;
-    } else if (data[0] == "<") {
-
-    } else {
-        showNoRemoteSetNotify();
-    }
-});
+setRemoteAccount(false);
+function setRemoteAccount(ifCallBack, callback) {
+    $.get(APIURLS.getRemoteId, function (data) {
+        if (data && data[0] != "<") {
+            localStorage.remoteOptionId = remoteOptionId = data.data[0].remoteOptionId;
+            if (ifCallBack) {
+                callback(data.data[0].remoteOptionId);
+            }
+        } else if (data[0] == "<") {
+            showErrorMessage();
+            return false;
+        } else {
+            showNoRemoteSetNotify();
+            return false;
+        }
+    });
+}
 
 function checkRemoteSet() {
     if (!remoteOptionId) {
@@ -102,7 +109,7 @@ function customDownload(tab, type) {
 function downloadAction(clickData, tab, api, remote) {
     if (clickData.linkUrl) {
         checkLogin(function () {
-            ajaxCall(api, clickData.linkUrl, remote, tab);
+            processCall(api, clickData.linkUrl, remote, tab);
         });
     } else if (clickData.selectionText) {
         t.sendMessage(tab.id, {cmd: "getSelectedHtml"}, function (resp) {
@@ -173,7 +180,7 @@ function processMultipleLink(html, needReg, remote, tab, api) {
                 }
             });
         } else if (result && result.length == 1) {
-            ajaxCall(api, result[0], remote, tab);
+            processCall(api, result[0], remote, tab);
         }
 
     });
@@ -193,12 +200,25 @@ function findLinkByText(text) {
     return text.match(urlReg);
 }
 
-function ajaxCall(api, link, remote, tab) {
+function processCall(api, link, remote, tab) {
     var dataBody = { url: link};
     if (remote) {
-        checkRemoteSet();
-        dataBody.remoteOptionId = remoteOptionId;
+        if (!checkRemoteSet()) {
+            setRemoteAccount(true, function (rmtid) {
+                dataBody.remoteOptionId = rmtid;
+                processAjax(api, link, true, tab, dataBody);
+            });
+        } else {
+            dataBody.remoteOptionId = remoteOptionId;
+            processAjax(api, link, true, tab, dataBody);
+        }
+    } else {
+        processAjax(api, link, false, tab, dataBody);
     }
+
+}
+
+function processAjax(api, link, remote, tab, dataBody) {
     $.ajax(api, {
         method: 'POST',
         data: dataBody
