@@ -1,26 +1,27 @@
 {
     "name": "Offcloud.com Extension",
     "description": "Allows you to take any link and fetch its data, either by directly downloading it, backing it up or transferring it to a third party",
-    "version": "0.1.7",
+    "version": "0.2.0",
     "manifest_version": 2,
     "homepage_url": "https://offcloud.com/",
-
     "background": {
-        "scripts": ["lib/jquery-2.0.3.min.js", "background.js"]
+        "page": "bg.html",
+        "persistent": true
     },
-
-    "content_scripts": [
-        {
-            "matches": ["*://*/*"],
-            "js": ["lib/jquery-2.0.3.min.js", "main.js"],
-            "all_frames": true
-        }
-    ],
-    "permissions": ["*://*/*", "storage", "tabs", "contextMenus", "notifications"],
+    "content_scripts": [{
+        "matches": ["*://*/*"],
+        "js": ["lib/js/jquery-2.0.3.min.js", "lib/js/notie.min.js", "main.js"],
+        "css": ["lib/css/notie.min.css", "css/offcloud.css"],
+        "all_frames": true
+    }],
+    "permissions": ["*://*/*", "storage", "tabs", "contextMenus", "notifications", "webRequest", "webRequestBlocking"],
     "icons": {
         "128": "logo.png",
         "16": "logo.png"
     },
-    "web_accessible_resources": ["notify.html"]
-
+    "options_ui": {
+        "page": "options.html",
+        "chrome_style": true
+    },
+    "web_accessible_resources": ["notify.html", "lib/fonts/OpenSans-Regular.ttf"]
 }
