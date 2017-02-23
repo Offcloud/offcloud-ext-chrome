@@ -4,7 +4,8 @@ var sm = chrome.runtime.sendMessage;
 var $loaderContainer = $("<div>").css({
     'position': 'fixed',
     'bottom': '5px',
-    'right': '5px'
+    'right': '5px',
+    'z-index':'999999999'
 });
 
 var $loaderSpinner = $('<div>').addClass('loader');

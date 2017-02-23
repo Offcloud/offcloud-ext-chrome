@@ -49,7 +49,8 @@ function getApiKey(callback) {
 function setRemoteAccount(ifCallBack, callback) {
     $.get(APIURLS.getRemoteId + "?apiKey=" + apiKey, function(data) {
         if (data && data[0] != "<") {
-            localStorage.remoteOptionId = remoteOptionId = data.data[0].remoteOptionId;
+            localStorage.remoteOptionId = data.data[0].remoteOptionId;
+            remoteOptionId = data.data[0].remoteOptionId;
             if (ifCallBack) {
                 callback(data.data[0].remoteOptionId);
             }
@@ -259,6 +260,27 @@ function processMultipleLink(html, needReg, remote, tab, api, href) {
     }
 }
 
+function processCall(api, link, remote, tab) {
+    var dataBody = {
+        url: link
+    };
+    if (remote) {
+        if (!remoteOptionId){
+            setRemoteAccount(true, function(rmtid) {
+                dataBody.remoteOptionId = rmtid;
+                processAjax(api, link, true, tab, dataBody);
+            }); 
+        }
+        else {
+            dataBody.remoteOptionId = remoteOptionId;
+            processAjax(api, link, true, tab, dataBody);  
+        }
+        
+    } else {
+        processAjax(api, link, false, tab, dataBody);
+    }
+}
+
 function findLinkByRegex(html) {
     var linkReg = /href=[\'"]?([^\'" >]+)/g;
     var result = html.match(linkReg);
@@ -271,25 +293,6 @@ function findLinkByRegex(html) {
 function findLinkByText(text) {
     var urlReg = /[a-zA-z]+:\/\/[^\s]*/g;
     return text.match(urlReg);
-}
-
-function processCall(api, link, remote, tab) {
-    var dataBody = {
-        url: link
-    };
-    if (remote) {
-        if (!checkRemoteSet()) {
-            setRemoteAccount(true, function(rmtid) {
-                dataBody.remoteOptionId = rmtid;
-                processAjax(api, link, true, tab, dataBody);
-            });
-        } else {
-            dataBody.remoteOptionId = remoteOptionId;
-            processAjax(api, link, true, tab, dataBody);
-        }
-    } else {
-        processAjax(api, link, false, tab, dataBody);
-    }
 }
 
 function processAjax(api, link, remote, tab, dataBody) {
