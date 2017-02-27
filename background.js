@@ -46,6 +46,14 @@ function getApiKey(callback) {
     });
 }
 
+function setApiKey(newApiKey){
+    s.set({
+        apiKey: newApiKey
+    }, function(){
+        apiKey = newApiKey;
+    });
+}
+
 function setRemoteAccount(ifCallBack, callback) {
     $.get(APIURLS.getRemoteId + "?apiKey=" + apiKey, function(data) {
         if (data && data[0] != "<") {
@@ -344,8 +352,8 @@ function checkLogin(callback) {
 om.addListener(function(req, sender, sendResponse) {
     var cmd = req.cmd;
 
-    if (req.action == "getApiKey")
-        getApiKey(req.email);
+    if (req.action == "setApiKey")
+        setApiKey(req.newApiKey);
 
     if (cmd == "copy") {
         var content = req.content;

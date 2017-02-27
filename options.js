@@ -7,6 +7,12 @@ function setEventHandlers(){
 		var apiKey = document.getElementById('apiKeyInput').value;
 		chrome.storage.local.set({
 			apiKey: apiKey
+		}, function(){
+			chrome.runtime.sendMessage({
+				action: "setApiKey",
+				newApiKey: apiKey
+			});
+			document.querySelector('.status-div').innerText = 'Your Api Key has been successfully changed!';
 		});
 	});
 }
