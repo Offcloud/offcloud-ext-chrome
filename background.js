@@ -237,7 +237,8 @@ function processMultipleLink(html, needReg, remote, tab, api, href) {
                             });
                             return false;
                         } else {
-                            finalData.push(responseData[0].url);
+                            if (!responseData[0].error)
+                                finalData.push(responseData[0].url);
                         }
                     }
                 } else {
@@ -355,17 +356,19 @@ om.addListener(function(req, sender, sendResponse) {
     if (req.action == "setApiKey")
         setApiKey(req.newApiKey);
 
-    if (cmd == "copy") {
-        var content = req.content;
-        copyTextToClipboard(content);
-        sendResponse({
-            res: 'done'
-        });
-    } else if (cmd == "removeFrame") {
-        t.executeScript(sender.tab.id, {
-            code: 'document.body.removeChild(document.getElementById("momane_notifyFrame"))'
-        });
-    } else if (cmd == "custom") {
+    if (cmd == "checkPageUrl"){
+        if (sender.url == sender.tab.url){
+            sendResponse({
+                success: true
+            });
+        } else {
+            sendResponse({
+                success: false
+            });
+        }
+    }
+
+    if (cmd == "custom") {
         var currentApi;
         if (req.type == 0) {
             currentApi = APIURLS.instantDld;
