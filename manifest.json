@@ -1,7 +1,7 @@
 {
     "name": "Offcloud.com Extension",
     "description": "Allows you to take any link and fetch its data, either by directly downloading it, backing it up or transferring it to a third party",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "manifest_version": 2,
     "homepage_url": "https://offcloud.com/",
     "background": {
@@ -11,8 +11,7 @@
     "content_scripts": [{
         "matches": ["*://*/*"],
         "js": ["lib/js/jquery-2.0.3.min.js", "lib/js/notie.min.js", "main.js"],
-        "css": ["lib/css/notie.min.css", "css/offcloud.css"],
-        "all_frames": true
+        "css": ["lib/css/notie.min.css", "css/offcloud.css"]
     }],
     "permissions": ["*://*/*", "storage", "tabs", "contextMenus", "notifications"],
     "icons": {

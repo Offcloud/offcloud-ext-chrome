@@ -1,15 +1,6 @@
-//preventing redirects
-chrome.runtime.sendMessage({
-    cmd: "checkPageUrl"
-}, function(message){
-    if (message.success)
-        main();
-});
+initMain();
 
-function main(){
-    var s = chrome.storage.local;
-    var sm = chrome.runtime.sendMessage;
-
+function initMain(){
     var $loaderContainer = $("<div>").css({
         'position': 'fixed',
         'bottom': '5px',
@@ -87,7 +78,7 @@ function main(){
 
     function showSuccessNotification(callback) {
         removeLoader();
-        notie.confirm('Result has been copied to clipboard! Open link(s) in new tab?', 'Yes', 'No', function() {
+        notie.confirm('Transfer has started & links are copied. Open them in new tab?', 'Yes', 'No', function() {
             callback();
         });
     }
