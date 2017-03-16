@@ -22,7 +22,6 @@ initMenus();
 
 function restoreOptions(){
     chrome.storage.local.get(['apiKey', 'remoteOptionId'], function(object){
-        console.log(object);
         if (object.apiKey != null)
             apiKey = object.apiKey;
 
@@ -72,7 +71,7 @@ function initMenus() {
         title: "Instant download selected links",
         contexts: ["link", "selection"],
         onclick: function(clickData, tab) {
-            downloadAction(clickData, tab, APIURLS.instantDld, false);
+            downloadAction(clickData, tab, APIURLS.instantDld, false, 0);
         }
     });
     cm.create({
@@ -80,7 +79,7 @@ function initMenus() {
         title: "Cloud download selected links",
         contexts: ["link", "selection"],
         onclick: function(clickData, tab) {
-            downloadAction(clickData, tab, APIURLS.cloudDld, false);
+            downloadAction(clickData, tab, APIURLS.cloudDld, false, 1);
         }
     });
     cm.create({
@@ -88,7 +87,7 @@ function initMenus() {
         title: "Remote download selected links",
         contexts: ["link", "selection"],
         onclick: function(clickData, tab) {
-            downloadAction(clickData, tab, APIURLS.remoteDld, true);
+            downloadAction(clickData, tab, APIURLS.remoteDld, true, 2);
         }
     });
 
@@ -136,7 +135,7 @@ function customDownload(tab, type) {
     }
 }
 
-function downloadAction(clickData, tab, apiLink, remote) {
+function downloadAction(clickData, tab, apiLink, remote, type) {
     if (apiKey == null) {
         checkLogin(function(){
             getApiKey(function() {
@@ -155,20 +154,19 @@ function downloadAction(clickData, tab, apiLink, remote) {
         });
 
         if (clickData.linkUrl) {
-            processCall(apiLink + apiKey, clickData.linkUrl, remote, tab);
+            processCall(apiLink + apiKey, clickData.linkUrl, remote, tab, type);
         } else if (clickData.selectionText) {
             t.sendMessage(tab.id, {
                 cmd: "getSelectedHtml"
             }, function(resp) {
                 if (resp && resp.html) {
-                    processMultipleLink(resp.html, true, remote, tab, apiLink, resp.href);
+                    processMultipleLink(resp.html, true, remote, tab, apiLink, resp.href, type);
                 }
             });
         }
     }
 }
-
-function processMultipleLink(html, needReg, remote, tab, api, href) {
+function processMultipleLink(html, needReg, remote, tab, api, href, type) {
     var result = [];
     if (needReg) {
         result = findLinkByRegex(html);
@@ -234,24 +232,26 @@ function processMultipleLink(html, needReg, remote, tab, api, href) {
                 //copying the result to the clipboard
                 var text = finalData.join("\n");
                 copyTextToClipboard(text);
-
                 t.sendMessage(tab.id, {
-                    cmd: "successNotification"
-                }, function() {
-                    finalData.forEach(function(url) {
-                        t.create({
-                            url: url
+                    cmd: "successNotification",
+                    type: type
+                }, function(res) {
+                    if (res){
+                        finalData.forEach(function(url) {
+                            t.create({
+                                url: url
+                            });
                         });
-                    });
+                    }
                 });
             }
         });
     } else if (result && result.length == 1) {
-        processCall(api, result[0], remote, tab);
+        processCall(api, result[0], remote, tab, type);
     }
 }
 
-function processCall(api, link, remote, tab) {
+function processCall(api, link, remote, tab, type) {
     var dataBody = {
         url: link
     };
@@ -261,10 +261,10 @@ function processCall(api, link, remote, tab) {
         else
             dataBody.remoteOptionId = "";
 
-        processAjax(api, link, true, tab, dataBody);  
+        processAjax(api, link, true, tab, dataBody, type);  
         
     } else {
-        processAjax(api, link, false, tab, dataBody);
+        processAjax(api, link, false, tab, dataBody, type);
     }
 }
 
@@ -282,7 +282,7 @@ function findLinkByText(text) {
     return text.match(urlReg);
 }
 
-function processAjax(api, link, remote, tab, dataBody) {
+function processAjax(api, link, remote, tab, dataBody, type) {
     $.ajax(api, {
         method: 'POST',
         data: dataBody
@@ -298,11 +298,14 @@ function processAjax(api, link, remote, tab, dataBody) {
             copyTextToClipboard(url);
 
             t.sendMessage(tab.id, {
-                cmd: "successNotification"
-            }, function() {
-                t.create({
-                    url: url
-                });
+                cmd: "successNotification",
+                type: type
+            }, function(res) {
+                if (res){
+                    t.create({
+                        url: url
+                    });
+                }
             });
         } else {
             t.sendMessage(tab.id, {
@@ -366,7 +369,8 @@ om.addListener(function(req, sender, sendResponse) {
         t.sendMessage(sender.tab.id, {
             cmd: "appendLoader"
         });
-        processMultipleLink(req.html, false, req.type == 2, sender.tab, currentApi);
+
+        processMultipleLink(req.html, false, req.type == 2, sender.tab, currentApi, null, req.type);
     }
 });
 

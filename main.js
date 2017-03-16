@@ -27,9 +27,8 @@ function initMain(){
             showRemoteInProcessNotification();
         }
         if (request.cmd == "successNotification") {
-            showSuccessNotification(function() {
-                //this will happen only if the user chose "yes" in a confirmation prompt
-                sendResponse();
+            showSuccessNotification(request.type, function(obj) {
+                sendResponse(obj);
             });
             return true;
         }
@@ -73,13 +72,22 @@ function initMain(){
 
     function showRemoteInProcessNotification() {
         removeLoader();
-        notie.alert(1, 'Remote transfer has started!', 4);
+        notie.alert(1, 'Your remote upload has begun.', 4);
     }
 
-    function showSuccessNotification(callback) {
+    function showSuccessNotification(type, callback) {
         removeLoader();
-        notie.confirm('Transfer has started & links are copied. Open them in new tab?', 'Yes', 'No', function() {
-            callback();
+
+        var confirmText = "";
+        if (type == 0)
+            confirmText = 'Downloads links copied to clipboard. Open them in new tab?';
+        else if (type == 1)
+            confirmText = 'Transfer has started & links are copied. Open them in new tab?'
+
+        notie.confirm(confirmText, 'Yes', 'No', function() {
+            callback({
+                success: true
+            });
         });
     }
 

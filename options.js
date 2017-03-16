@@ -11,10 +11,12 @@ setEventHandlers();
 function setEventHandlers(){
 	saveApiKeyBtn.addEventListener('click', function(){
 		var apiKey = apiKeyInput.value;
+		if (apiKey == "")
+			apiKey = null;
+
 		chrome.storage.local.set({
 			apiKey: apiKey
 		}, function(){
-			console.log('123');
 			chrome.runtime.sendMessage({
 				action: "setApiKey",
 				newApiKey: apiKey
@@ -22,6 +24,7 @@ function setEventHandlers(){
 			statusDiv.innerText = 'Your Api Key has been successfully changed!';
 		});
 	});
+	
 	saveRemoteOptionBtn.addEventListener('click', function(){
 		var remoteOptionId = remoteOptionsSelect.value;
 		if (remoteOptionId != "default"){
@@ -32,16 +35,14 @@ function setEventHandlers(){
 					action: "setRemoteOptionId",
 					newRemoteOptionId: remoteOptionId
 				});
-				statusDiv.innerText = 'Your default remote option has been successfully changed!';
+				statusDiv.innerText = 'Your default remote account has been successfully changed!';
 			});
 		} else {
 			chrome.storage.local.remove('remoteOptionId', function(){
 				chrome.runtime.sendMessage({
 					action: "removeRemoteOptionId"
 				});
-				statusDiv.innerText = 'Your default remote option has been successfully changed!';
 			});
-
 		}
 		
 	});
@@ -80,7 +81,6 @@ function setRemoteOptions(data, lastRemoteOptionId){
 
 function getRemoteOptionsRequest(apiKey){
 	return new Promise(function(resolve, reject){
-		console.log('here');
 		var request = new XMLHttpRequest();
 	    request.onreadystatechange = function() {
 	        if (this.readyState == 4) {
