@@ -80,7 +80,7 @@ function initMain(){
 
         var confirmText = "";
         if (type == 0)
-            confirmText = 'Downloads links copied to clipboard. Open them in new tab?';
+            confirmText = 'Download links copied to clipboard. Open them in new tab?';
         else if (type == 1)
             confirmText = 'Transfer has started & links are copied. Open them in new tab?'
 
