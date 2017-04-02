@@ -59,8 +59,8 @@ function setEventHandlers(){
 					action: "setFolderId",
 					newFolderId: folderId
 				});
-				if (folderId) statusDiv.innerText = 'Your Folder ID has been successfully changed!';
-				else statusDiv.innerText = 'Your Folder ID has been cleared.';
+				if (folderId) statusDiv.innerText = 'Your Folder ID / Parent ID has been successfully changed!';
+				else statusDiv.innerText = 'Your Folder ID / Parent ID has been cleared.';
 			});
 	});
 }
