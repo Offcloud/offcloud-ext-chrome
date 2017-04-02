@@ -167,7 +167,7 @@ function downloadAction(clickData, tab, apiLink, remote, type) {
     
     function startAction() {
         apiLink += "?apiKey=" + apiKey;
-        
+
         t.sendMessage(tab.id, {
             cmd: "appendLoader"
         });
@@ -212,10 +212,10 @@ function processMultipleLink(html, needReg, remote, tab, api, href, type) {
                     dataBody.remoteOptionId = remoteOptionId;
                 else
                     dataBody.remoteOptionId = "";
-				if (folderId)
-					dataBody.folderId = folderId;
-				else
-					dataBody.folderId = "";
+                if (folderId)
+                    dataBody.folderId = folderId;
+                else
+                    dataBody.folderId = "";
             }
             requestList.push($.ajax(api, {
                 method: 'POST',
