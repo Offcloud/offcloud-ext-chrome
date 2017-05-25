@@ -154,7 +154,7 @@ function downloadAction(clickData, tab, apiLink, remote, type) {
         });
 
         if (clickData.linkUrl) {
-            processCall(apiLink + apiKey, clickData.linkUrl, remote, tab, type);
+            processCall(apiLink, clickData.linkUrl, remote, tab, type);
         } else if (clickData.selectionText) {
             t.sendMessage(tab.id, {
                 cmd: "getSelectedHtml"
