@@ -1,7 +1,9 @@
 var apiKeyInput = document.getElementById('apiKeyInput');
 var remoteOptionsSelect = document.getElementById('remoteOptionsSelect');
+var folderIdInput = document.getElementById('folderIdInput');
 var saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
 var saveRemoteOptionBtn = document.getElementById('saveRemoteOptionBtn');
+var saveFolderIdBtn = document.getElementById('saveFolderIdBtn');
 var statusDiv = document.querySelector('.status-div');
 
 restoreOptions();
@@ -44,18 +46,34 @@ function setEventHandlers(){
 				});
 			});
 		}
-		
+	});
+	
+	saveFolderIdBtn.addEventListener('click', function(){
+		var folderId = folderIdInput.value;
+		if (folderId == "")
+			folderId = null;
+			chrome.storage.local.set({
+				folderId: folderId
+			}, function(){
+				chrome.runtime.sendMessage({
+					action: "setFolderId",
+					newFolderId: folderId
+				});
+				if (folderId) statusDiv.innerText = 'Your Folder ID / Parent ID has been successfully changed!';
+				else statusDiv.innerText = 'Your Folder ID / Parent ID has been cleared.';
+			});
 	});
 }
 
 function restoreOptions(){
-	chrome.storage.local.get(['apiKey', 'remoteOptionId'], function(object){
+	chrome.storage.local.get(['apiKey', 'remoteOptionId', 'folderId'], function(object){
 		if (object.apiKey != null){
 			apiKeyInput.value = object.apiKey;
 			getRemoteOptionsRequest(object.apiKey)
 				.then((data) => { setRemoteOptions(data, object.remoteOptionId); })
 				.catch((err) => { console.log(err); });
 		}
+		folderIdInput.value = object.folderId;
 	});
 }
 

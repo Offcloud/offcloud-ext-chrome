@@ -5,6 +5,7 @@ var remoteOptionId;
 var s = chrome.storage.local;
 var cn = chrome.notifications;
 var apiKey;
+var folderId;
 
 var APIURLS = {
     instantDld: 'https://offcloud.com/api/instant/download',
@@ -21,12 +22,15 @@ restoreOptions();
 initMenus();
 
 function restoreOptions(){
-    chrome.storage.local.get(['apiKey', 'remoteOptionId'], function(object){
+    chrome.storage.local.get(['apiKey', 'remoteOptionId', 'folderId'], function(object){
         if (object.apiKey != null)
             apiKey = object.apiKey;
 
         if (object.remoteOptionId != null)
             remoteOptionId = object.remoteOptionId;
+
+        if (object.folderId != null)
+            folderId = object.folderId;
     });
 }
 
@@ -60,6 +64,21 @@ function setApiKey(newApiKey){
     }, function(){
         apiKey = newApiKey;
         setDefaultRemoteAccount(()=>{});
+    });
+}
+
+function setFolderId(newFolderId){
+    s.set({
+        folderId: newFolderId
+    }, function(){
+        folderId = newFolderId;
+    });
+}
+
+function getFolderId(callback) {
+    s.get('folderId', function(result){
+        folderId = result.folderId;
+        callback();
     });
 }
 
@@ -193,6 +212,10 @@ function processMultipleLink(html, needReg, remote, tab, api, href, type) {
                     dataBody.remoteOptionId = remoteOptionId;
                 else
                     dataBody.remoteOptionId = "";
+                if (folderId)
+                    dataBody.folderId = folderId;
+                else
+                    dataBody.folderId = "";
             }
             requestList.push($.ajax(api, {
                 method: 'POST',
@@ -260,6 +283,10 @@ function processCall(api, link, remote, tab, type) {
             dataBody.remoteOptionId = remoteOptionId;
         else
             dataBody.remoteOptionId = "";
+        if (folderId)
+        	dataBody.folderId = folderId;
+        else
+            dataBody.folderId = "";
 
         processAjax(api, link, true, tab, dataBody, type);  
         
@@ -354,6 +381,9 @@ om.addListener(function(req, sender, sendResponse) {
 
     if (req.action == "removeRemoteOptionId")
         remoteOptionId = null;
+        
+    if (req.action == "setFolderId")
+        setFolderId(req.newFolderId);
 
     if (req.cmd == "custom") {
         var currentApi;
